@@ -1,0 +1,22 @@
+# Common code included in every Makefile
+
+exec_prefix	= @exec_prefix@
+insmod_static	= @insmod_static@
+mandir		= @mandir@
+prefix		= @prefix@
+sbindir		= @sbindir@
+
+AR		= @AR@
+ARCH		= @ARCH@
+CC		= @CC@
+CFLAGS		= @CFLAGS@
+BUILDCC		= @BUILDCC@
+BUILDCFLAGS	= @BUILDCFLAGS@
+INSTALL		= @INSTALL_LOCAL@
+LDFLAGS		= @LDFLAGS@
+LIBS		= @LIBS@
+MKDIR		= @MKDIR@
+PARSERCFLAGS	= @PARSERCFLAGS@
+RANLIB		= @RANLIB@
+STRIP		= @STRIP@
+USE_SYSCALL	= @USE_SYSCALL@

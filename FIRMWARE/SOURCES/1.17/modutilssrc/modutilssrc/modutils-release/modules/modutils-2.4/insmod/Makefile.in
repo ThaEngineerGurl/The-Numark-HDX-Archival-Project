@@ -1,0 +1,112 @@
+# $Id: Makefile.in 1.1 Fri, 05 Jan 2001 12:45:19 +1100 kaos $
+
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+include	../Makefile.common
+
+DEFSNOARCH	:= -I$(srcdir)/../include -D_GNU_SOURCE @DEFS@ $(EXTRA_DEFS)
+DEFS		:= -DELF_MACHINE_H='"elf_$(ARCH).h"' -DARCH_$(ARCH)
+
+PROGS		:= insmod modprobe rmmod lsmod ksyms kallsyms modinfo
+
+# COMB is the list of utilities to combine with insmod into one executable
+COMB		:= @COMBINE_rmmod@ @COMBINE_modprobe@ @COMBINE_lsmod@ @COMBINE_ksyms@ @COMBINE_kallsyms@
+COMBDEFS	:= $(addprefix -DCOMBINE_, $(COMB))
+COMB_STATIC	:= $(addsuffix .static, $(COMB))
+
+TARGETS_REAL	:= $(filter-out $(COMB),$(PROGS))
+TARGETS	:= $(PROGS)
+
+ifeq ($(insmod_static),yes)
+TARGETS_REAL	+= insmod.static
+TARGETS		+= insmod.static $(COMB_STATIC)
+endif
+
+INSMODOBJS	:= insmod.o
+MODINFOOBJS	:= modinfo.o
+
+# arch specific definitions for common 32/64 code
+
+ifeq (@COMMON_sparc@,yes)
+DEFS64		:= -DELF_MACHINE_H='"elf_sparc64.h"' -DARCH_sparc64
+endif
+
+ifeq (@COMMON_hppa@,yes)
+DEFS64		:= -DELF_MACHINE_H='"elf_hppa64.h"' -DARCH_hppa64
+endif
+
+# arch independent definitions for common 32/64 code
+
+ifdef DEFS64
+INSMODOBJS	+= insmod_64.o kallsyms_64.o
+MODINFOOBJS	+= modinfo_64.o
+DEFSNOARCH	+= -DCOMMON_3264
+DEFS		+= -DONLY_32
+DEFS64		+= -DONLY_64
+endif
+
+INSMODOBJS	+= $(addsuffix .o, $(COMB))
+
+#=====================================================================
+
+# Rule for building "to-be-combined" modutils object files
+%.o: %.c
+	$(CC) $(CFLAGS) $(DEFSNOARCH) $(DEFS) $(COMBDEFS) -c -o $@ $<
+
+# Rule for building 64 bit versions, only used when building common code
+# for 32 and 64 bit systems.
+%_64.o: %.c
+	$(CC) $(CFLAGS) $(DEFSNOARCH) $(DEFS64) $(COMBDEFS) -c -o $@ $<
+
+# Rule for building "normal" modutils executables (non-combined)
+%: %.c ../obj/libobj.a ../util/libutil.a
+	$(CC) $(CFLAGS) $(DEFSNOARCH) $(DEFS) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+#=====================================================================
+
+all: .depend $(TARGETS)
+
+insmod: $(INSMODOBJS) ../obj/libobj.a ../util/libutil.a
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+insmod.static: $(INSMODOBJS) ../obj/libobj.a ../util/libutil.a
+	$(CC) -static $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+$(COMB): insmod
+	ln -sf $< $@
+
+$(COMB_STATIC): insmod.static
+	ln -sf $< $@
+
+modinfo: $(MODINFOOBJS) ../obj/libobj.a ../util/libutil.a
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+install install-bin: all
+	@set -x;\
+	for i in $(TARGETS_REAL); do \
+	$(MKDIR) $(sbindir); \
+	$(INSTALL) $(STRIP) $$i $(sbindir); done;
+	for i in $(srcdir)/insmod_ksymoops_clean $(srcdir)/kernelversion; do \
+	$(MKDIR) $(sbindir); \
+	$(INSTALL) $$i $(sbindir); done;
+	for i in $(COMB); do \
+	ln -sf insmod $(sbindir)/$$i; \
+	(test "$(insmod_static)" = yes && \
+		ln -sf insmod.static $(sbindir)/$$i.static) || true; \
+	done
+
+clean:
+	rm -f *.o $(PROGS) *.static
+
+realclean: clean
+	rm -f .depend
+
+distclean: realclean
+	rm -f Makefile
+
+dep depend .depend: $(addsuffix .c, $(PROGS))
+	$(CC) -M $(CFLAGS) $(DEFSNOARCH) $(DEFS) $^ > .depend
+
+ifeq (.depend,$(wildcard .depend))
+include .depend
+endif

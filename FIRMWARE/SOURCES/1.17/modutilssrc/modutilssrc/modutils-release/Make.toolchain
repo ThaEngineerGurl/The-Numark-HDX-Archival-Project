@@ -1,0 +1,20 @@
+# Make.toolchain
+#
+# A pointer to the recommended toolchain for a build.
+#
+# (C) 1999-2000 empeg ltd.
+#
+# This software is licensed under the GNU General Public Licence (see file
+# COPYING), unless you possess an alternative written licence from empeg ltd.
+#
+# (:Rio Source Release  17-Oct-2005 17:42 toby:)
+#
+# Note that this file must be includeable from both Makefiles and
+# shell scripts - be very careful what syntax you use!
+#
+# If you add another root here think about whether you should add it to
+# autobuild.sh too.
+
+TOOLCHAIN_ROOT=/home/empeg/toolchain-kyanite_v1
+TOOLCHAIN_ECOS_ROOT=/home/empeg/toolchain-ecos-HEAD
+TOOLCHAIN_ECOS2_ROOT=/home/empeg/toolchain-ecos2-HEAD

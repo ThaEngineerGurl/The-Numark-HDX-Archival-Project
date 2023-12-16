@@ -1,0 +1,82 @@
+# Make.rules.vc
+#
+# Generic rules (in common between all makefiles) for building with Visual C++
+#
+# (C) 1999-2001 empeg ltd.
+#
+# This software is licensed under the GNU General Public Licence (see file
+# COPYING), unless you possess an alternative written licence from empeg ltd.
+#
+# (:Rio Source Release  17-Oct-2005 17:42 toby:)
+
+TARGET_INCLUDEPATH=/I $(TOP)/lib /I $(TOP)/lib/core /I $(TOP)/lib/util /I $(TOP)/lib/protocol
+TARGET_CXX=cl
+TARGET_CXXFLAGS=/nologo /W3 /GX /Fr"$(TARGET_PREFIX)" /Fo"$(TARGET_PREFIX)" /Fd"$(TARGET_PREFIX)" /FD \
+		/D "WIN32" /D "_MBCS" $(TARGET_INCLUDEPATH)
+TARGET_MKDIR:=mkdir -p $(TARGET_PREFIX)
+TARGET_GENERIC_MKDIR=mkdir -p $(TARGET_GENERIC_LIBDIR)
+TARGET_SPECIFIC_MKDIR=mkdir -p $(TARGET_SPECIFIC_LIBDIR)
+
+ifeq ($(DEBUG), 0)
+TARGET_CXXFLAGS+=/MD /O2 /D "NDEBUG" 
+else
+TARGET_CXXFLAGS+=/MDd /Gm /ZI /Od /D "_DEBUG" /GZ 
+endif
+TARGET_CXXFLAGS+=/c 
+
+OBJ_SUFFIX:=.obj
+LIB_PREFIX:=
+LIB_SUFFIX:=.lib
+EXE_SUFFIX:=.exe
+DLL_SUFFIX:=.dll
+RES_SUFFIX:=.res
+
+$(TARGET_PREFIX)%$(OBJ_SUFFIX) : %.c ; $(CC_PRE) $(TARGET_MKDIR) && \
+	DEPENDENCIES_OUTPUT="$(TARGET_PREFIX)$*.d2 $@" $(TARGET_CC) $(TARGET_CFLAGS) -o $@ $<
+	@cp -f $(TARGET_PREFIX)$*.d2 $(TARGET_PREFIX)$*.d
+	@tr -s ' \\' '\n' < $(TARGET_PREFIX)$*.d2 | grep -v ':' | sed -e 's/$$/:/' >> $(TARGET_PREFIX)$*.d
+	@$(RM) $(TARGET_PREFIX)$*.d2
+
+$(TARGET_PREFIX)%$(OBJ_SUFFIX) : %.cpp ; $(CC_PRE) $(TARGET_MKDIR) && \
+	$(TARGET_CXX) $(TARGET_CXXFLAGS) $<
+
+TARGET_RC:=rc
+
+TARGET_RCFLAGS:=/l 0x809
+ifeq ($(DEBUG), 0)
+TARGET_RCFLAGS+=/d "NDEBUG"
+else
+TARGET_RCFLAGS+=/d "_DEBUG"
+endif
+
+$(TARGET_PREFIX)%$(RES_SUFFIX) : %.rc ; $(RC_PRE) $(TARGET_MKDIR) && \
+	$(TARGET_RC) $(TARGET_RCFLAGS) /Fo"$(patsubst %.rc,%.res,$@)" $<
+
+TARGET_AR:=lib /nologo
+TARGET_LD:=link
+TARGET_LDFLAGS:=/nologo /machine:I386
+ifeq ($(DEBUG), 0)
+TARGET_LDFLAGS+=/incremental:no
+else
+TARGET_LDFLAGS+=
+endif
+
+$(TARGET_SPECIFIC_LIBDIR)%$(LIB_SUFFIX) :
+	$(TARGET_SPECIFIC_MKDIR)
+	$(RM) $@
+	$(TARGET_AR) /out:$@ $^
+
+$(TARGET_GENERIC_LIBDIR)%$(LIB_SUFFIX) :
+	$(TARGET_GENERIC_MKDIR)
+	$(RM) $@
+	$(TARGET_AR) /out:$@ $^
+
+$(TARGET_SPECIFIC_LIBDIR)%$(DLL_SUFFIX) :
+	$(TARGET_SPECIFIC_MKDIR)
+	$(RM) $@
+	$(TARGET_LD) $(TARGET_LDFLAGS) /dll /out:$@ $^ /implib:"$(patsubst %.dll,%.lib,$@)" /pdb:"$(patsubst %.dll,%.pdb,$@)"
+
+$(TARGET_GENERIC_LIBDIR)%$(DLL_SUFFIX) :
+	$(TARGET_GENERIC_MKDIR)
+	$(RM) $@
+	$(TARGET_LD) $(TARGET_LDFLAGS) /dll /out:$@ $^ /implib:"$(patsubst %.dll,%.lib,$@)" /pdb:"$(patsubst %.dll,%.pdb,$@)"

@@ -1,0 +1,29 @@
+# $Id: Makefile.in 1.1 Fri, 05 Jan 2001 12:45:19 +1100 kaos $
+
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+include	Makefile.common
+
+TARGETS = all install-bin clean distclean realclean dep depend
+SUBDIRS = util obj insmod genksyms depmod @kerneld_SUBDIR@
+ifneq (@kerneld_SUBDIR@,)
+	SUBDIRS += man_kerneld
+endif
+
+$(TARGETS)::
+	@for i in $(SUBDIRS); do $(MAKE) -C $$i $@ ; done
+
+distclean realclean install-man::
+	$(MAKE) -C man $@
+ifneq (@kerneld_SUBDIR@,)
+	$(MAKE) -C man_kerneld $@
+endif
+
+install: install-bin install-man
+
+realclean::
+	rm -f config.log config.cache config.status
+
+distclean::
+	rm -f config.log config.cache config.status
+	rm -f Makefile Makefile.common

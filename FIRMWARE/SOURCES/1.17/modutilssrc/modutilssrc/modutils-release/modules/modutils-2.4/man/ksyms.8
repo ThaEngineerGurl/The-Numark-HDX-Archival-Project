@@ -1,0 +1,37 @@
+.\" Copyright (c) 1996 Free Software Foundation, Inc.
+.\" This program is distributed according to the Gnu General Public License.
+.\" See the file COPYING in the kernel source directory
+.\" $Id: ksyms.8 1.1 Fri, 05 Jan 2001 12:45:19 +1100 kaos $
+.\"
+.TH KSYMS 8 "26 Dec 1996" Linux "Linux Module Support"
+.SH NAME
+ksyms \- display exported kernel symbols.
+.SH SYNOPSIS
+.B ksyms
+[ \-a ] [ \-h ] [ \-m ]
+.SH DESCRIPTION
+.B Ksyms
+shows information about exported kernel symbols.  The format is
+address, name, and defining module.
+.SS OPTIONS
+.TP
+.I \-a
+Display all symbols.  By default, symbols from the kernel proper
+are suppressed.
+.TP
+.I \-h
+Suppress the column header.
+.TP
+.I \-m
+Display module information.  Includes each module's kernel load address
+and size in the listing.
+.SH SEE ALSO
+insmod(8), modprobe(8), depmod(8), rmmod(8), lsmod(8), modules(2)
+.SH HISTORY
+The
+.B ksyms
+command was first conceived by Bjorn Ekwall <bj0rn@blox.se>
+.br
+The '-m' option was inspired by David Hinds <dhinds@allegro.stanford.edu>
+.br
+Updated for 2.1.17 by Richard Henderson <rth@tamu.edu>

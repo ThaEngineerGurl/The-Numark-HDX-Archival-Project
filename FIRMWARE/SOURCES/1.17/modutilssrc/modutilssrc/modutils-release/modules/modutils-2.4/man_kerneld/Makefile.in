@@ -1,0 +1,21 @@
+# $Id: Makefile.in 1.1 Fri, 05 Jan 2001 12:45:19 +1100 kaos $
+
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+include	../Makefile.common
+
+######################################################################
+
+all install-bin clean dep depend install:
+
+install-man:
+	for i in $(srcdir)/*.[1-8] ; do \
+	  ext=`echo $$i | sed 's/.*\.//'`; \
+	  $(MKDIR) $(mandir)/man$$ext/; \
+	  $(INSTALL) -m 444 $$i $(mandir)/man$$ext/; \
+	done
+
+realclean: clean
+
+distclean: realclean
+	rm -f Makefile

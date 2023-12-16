@@ -1,0 +1,40 @@
+TOP=../..
+
+include $(TOP)/Make.rules
+
+# We don't want to pass ARCH down into the modutils makefile since it
+# uses it for something similar but not close enough.
+MAKEOVERRIDES=
+
+ifeq ($(ARCH), arm)
+all : $(TARGET_PREFIX)Makefile
+	$(MAKE) -C $(TARGET_PREFIX) -f Makefile
+
+$(TARGET_PREFIX)Makefile : Makefile.in configure
+	mkdir -p $(TARGET_PREFIX)
+	cd $(TARGET_PREFIX) && CC=$(TARGET_CC) BUILDCC=$(HOST_CC) ../configure --target=arm-empeg-linux --prefix=$(DISK_ROOT)
+
+downloadable-root : all
+	mkdir -p $(DISK_ROOT)/bin
+	cp $(TARGET_PREFIX)insmod/insmod $(DISK_ROOT)/bin
+	ln -sf insmod $(DISK_ROOT)/bin/lsmod
+	ln -sf insmod $(DISK_ROOT)/bin/modprobe
+	ln -sf insmod $(DISK_ROOT)/bin/rmmod
+	cp $(TARGET_PREFIX)insmod/modinfo $(DISK_ROOT)/bin
+	cp $(TARGET_PREFIX)depmod/depmod $(DISK_ROOT)/bin
+
+clean :
+	rm -rf $(TARGET_PREFIX)
+endif
+
+ifeq ($(ARCH), pc)
+all : $(HOST_PREFIX)Makefile
+	$(MAKE) -C $(HOST_PREFIX) -f Makefile
+
+$(HOST_PREFIX)Makefile : Makefile.in configure
+	mkdir -p $(HOST_PREFIX)
+	cd $(HOST_PREFIX) && CC=$(HOST_CC) ../configure --target=arm-empeg-linux
+
+clean :
+	rm -rf $(HOST_PREFIX)
+endif

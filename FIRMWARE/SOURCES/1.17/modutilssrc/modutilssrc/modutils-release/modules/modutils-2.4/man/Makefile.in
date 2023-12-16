@@ -1,0 +1,27 @@
+# $Id: Makefile.in 1.1 Fri, 05 Jan 2001 12:45:19 +1100 kaos $
+
+VPATH	= @srcdir@
+srcdir	= @srcdir@
+include	../Makefile.common
+
+######################################################################
+
+all install-bin clean dep depend install:
+
+install-man:
+	@for i in $(srcdir)/*.8 ; do \
+	  gone=`basename $$i .8`.1; \
+	  for f in $(mandir)/man1/$${gone}*; \
+	  do if [ -f $$f ]; then echo Removing old $$f; rm -f $$f; fi; done; \
+	done
+	rm -f $(mandir)/man5/conf.modules.5
+	for i in $(srcdir)/*.[1-8] ; do \
+	  ext=`echo $$i | sed 's/.*\.//'`; \
+	  $(MKDIR) $(mandir)/man$$ext/; \
+	  $(INSTALL) -m 444 $$i $(mandir)/man$$ext/; \
+	done
+
+realclean: clean
+
+distclean: realclean
+	rm -f Makefile
