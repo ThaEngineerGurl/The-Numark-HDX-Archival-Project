@@ -1,6 +1,6 @@
 
 The MP3mobile 
-This page documents my efforts at fitting my car with a MP3 player: I'm still twiddling with lots of bits of the setup, and so this page will change when things do with the setup. Hopefully, this page will help anyone else trying to do the same thing! There are now some pictures (thanks to Patrick, who lent me his Mustek VDC-200).
+This page documents my(Hugo Fiennes) efforts at fitting my car with a MP3 player: I'm still twiddling with lots of bits of the setup, and so this page will change when things do with the setup. Hopefully, this page will help anyone else trying to do the same thing! There are now some pictures (thanks to Patrick, who lent me his Mustek VDC-200).
 
 First of all: a disclaimer. Basically, all this worked for me. If it doesn't work for you, burns down your house/car/household pet, that's your problem. People building PSUs, it's a good idea to test them (voltage, current, etc) under load (eg: a partially dead hard disk) before plugging in an expensive PC motherboard which it may well blow up.
 
